@@ -70,7 +70,7 @@ public class MainWindowViewModel : ViewModelBase
         set => SetProperty(ref _isServerRunning, value);
     }
     
-    private string _serverStatus = "Stopped";
+    private string _serverStatus = "Остановлен";
     public string ServerStatus
     {
         get => _serverStatus;
@@ -225,8 +225,8 @@ public class MainWindowViewModel : ViewModelBase
             _serverCts = new CancellationTokenSource();
             await _server.StartAsync(ServerPort, _serverCts.Token);
             IsServerRunning = true;
-            ServerStatus = $"Running on port {ServerPort}";
-            ClientResponse = $"Server started on port {ServerPort}";
+            ServerStatus = $"Запущен на порту {ServerPort}";
+            ClientResponse = $"Сервер запущен на порту {ServerPort}";
             
             _logger.AddLog(new LogEntry(
                 Guid.NewGuid().ToString(),
@@ -243,7 +243,7 @@ public class MainWindowViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ClientResponse = $"Server Error: {ex.Message}";
+            ClientResponse = $"Ошибка сервера: {ex.Message}";
         }
     }
     
@@ -327,7 +327,7 @@ public class MainWindowViewModel : ViewModelBase
             
             if (isLocalRequest && !IsServerRunning)
             {
-                ClientResponse = "Error: Server is not running. Click 'Start Server' first.";
+                ClientResponse = "Ошибка: Сервер не запущен. Нажмите 'Запустить сервер'.";
                 return;
             }
             
@@ -346,7 +346,7 @@ public class MainWindowViewModel : ViewModelBase
             {
                 if (string.IsNullOrWhiteSpace(ClientRequestBody))
                 {
-                    ClientResponse = "Error: Request body is required for POST";
+                    ClientResponse = "Ошибка: Тело запроса обязательно для POST";
                     return;
                 }
                 response = await _client.PostAsync(ClientUrl, ClientRequestBody);
@@ -386,7 +386,7 @@ public class MainWindowViewModel : ViewModelBase
             Console.WriteLine($"[DEBUG] HttpRequestException: {ex.Message}");
             // ============================            
             
-            ClientResponse = $"HTTP Error: {ex.Message}";
+            ClientResponse = $"Ошибка HTTP: {ex.Message}";
             
             var entry = new LogEntry(
                 Guid.NewGuid().ToString(),
@@ -405,13 +405,13 @@ public class MainWindowViewModel : ViewModelBase
         catch (TaskCanceledException ex)
         {
             Console.WriteLine($"[DEBUG] TaskCanceledException: {ex.Message}");
-            ClientResponse = $"Timeout Error (30 seconds): {ex.Message}";
+            ClientResponse = $"Ошибка таймаута (30 секунд): {ex.Message}";
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[DEBUG] Exception: {ex.Message}");
             Console.WriteLine($"[DEBUG] Stack trace: {ex.StackTrace}");            
-            ClientResponse = $"Error: {ex.Message}";
+            ClientResponse = $"Ошибка: {ex.Message}";
         }
         // ===== ДИАГНОСТИКА КОНЕЦ =====
         Console.WriteLine($"[DEBUG] SendRequestAsync END");
@@ -422,7 +422,7 @@ public class MainWindowViewModel : ViewModelBase
     {
         var filePath = $"logs_{DateTime.Now:yyyyMMdd_HHmmss}.json";
         await _logger.SaveToFileAsync(filePath);
-        ClientResponse = $"Logs saved to {filePath}";
+        ClientResponse = $"Логи сохранены в {filePath}";
     }
     
     private void UpdateLogs()
@@ -475,10 +475,10 @@ public class MainWindowViewModel : ViewModelBase
         var stats = _logger.GetStatistics();
         
         StatisticsText = 
-            $"Total: {stats.TotalRequests} | " +
+            $"Всего: {stats.TotalRequests} | " +
             $"GET: {stats.GetRequests} | " +
             $"POST: {stats.PostRequests} | " +
-            $"Avg Time: {stats.AverageProcessingTimeMs:F1}ms";
+            $"Среднее время: {stats.AverageProcessingTimeMs:F1}ms";
     }
 
     private void UpdatePeakLoad()
@@ -489,13 +489,13 @@ public class MainWindowViewModel : ViewModelBase
         
         if (stats.RequestsPerMinute.Count == 0)
         {
-            PeakLoadData.Add("No data yet");
+            PeakLoadData.Add("Данных пока нет");
             return;
         }
         
         foreach (var minute in stats.RequestsPerMinute.OrderByDescending(x => x.Value).Take(10))
         {
-            PeakLoadData.Add($"{minute.Key:HH:mm:ss} - {minute.Value} req/min");
+            PeakLoadData.Add($"{minute.Key:HH:mm:ss} - {minute.Value} запросов/мин");
         }
     }    
 }

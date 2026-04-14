@@ -7,7 +7,7 @@
         mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="800"
         x:Class="HttpMonitorApp.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="HTTP Monitor System"
+        Title="Система мониторинга HTTP-запросов"
         Width="1200" Height="800">
     
     <Design.DataContext>
@@ -15,45 +15,45 @@
     </Design.DataContext>
     
     <DockPanel>
-        <!-- Server Control Panel -->
+        <!-- Верхняя панель: управление сервером -->
         <Border DockPanel.Dock="Top" Background="#2D2D2D" Padding="10" Margin="0,0,0,5">
             <StackPanel Orientation="Horizontal" Spacing="10">
-                <TextBlock Text="Server Port:" VerticalAlignment="Center" Foreground="White"/>
+                <TextBlock Text="Порт сервера:" VerticalAlignment="Center" Foreground="White"/>
                 <NumericUpDown Value="{Binding ServerPort}" Width="130" Minimum="1" Maximum="65535"/>
-                <Button Command="{Binding StartServerCommand}" Content="Start Server" Background="Green"/>
-                <Button Command="{Binding StopServerCommand}" Content="Stop Server" Background="Red"/>
+                <Button Command="{Binding StartServerCommand}" Content="Запустить сервер" Background="Green"/>
+                <Button Command="{Binding StopServerCommand}" Content="Остановить сервер" Background="Red"/>
                 <TextBlock Text="{Binding ServerStatus}" VerticalAlignment="Center" Foreground="Yellow"/>
             </StackPanel>
         </Border>
         
         <Grid ColumnDefinitions="*, 2*, *">
-            <!-- Left: Client -->
+            <!-- Левая панель: HTTP-клиент -->
             <Border Grid.Column="0" Background="#2D2D2D" Margin="5">
                 <StackPanel Margin="10" Spacing="10">
-                    <TextBlock Text="HTTP Client" FontSize="16" FontWeight="Bold"/>
+                    <TextBlock Text="HTTP-клиент" FontSize="16" FontWeight="Bold"/>
                     <TextBlock Text="URL:"/>
                     <TextBox Text="{Binding ClientUrl}"/>
-                    <TextBlock Text="Method:"/>
+                    <TextBlock Text="Метод:"/>
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <RadioButton Content="GET" IsChecked="{Binding IsGetSelected}" GroupName="Method"/>
                         <RadioButton Content="POST" IsChecked="{Binding IsPostSelected}" GroupName="Method"/>
                     </StackPanel>
-                    <TextBlock Text="Request Body (JSON):"/>
+                    <TextBlock Text="Тело запроса (JSON):"/>
                     <TextBox Text="{Binding ClientRequestBody}" Height="100" TextWrapping="Wrap" AcceptsReturn="True"/>
-                    <Button Command="{Binding SendRequestCommand}" Content="Send Request" Background="#0078D4"/>
-                    <Button Command="{Binding SaveLogsCommand}" Content="Save Logs" Background="#6B6B6B"/>
-                    <TextBlock Text="Response:" FontWeight="Bold"/>
+                    <Button Command="{Binding SendRequestCommand}" Content="Отправить запрос" Background="#0078D4"/>
+                    <Button Command="{Binding SaveLogsCommand}" Content="Сохранить логи" Background="#6B6B6B"/>
+                    <TextBlock Text="Ответ сервера:" FontWeight="Bold"/>
                     <TextBox Text="{Binding ClientResponse}" Height="150" TextWrapping="Wrap" IsReadOnly="True"/>
                 </StackPanel>
             </Border>
             
-            <!-- Center: Logs -->
+            <!-- Центральная панель: логи -->
             <Border Grid.Column="1" Background="#2D2D2D" Margin="5">
                 <StackPanel Margin="10" Spacing="10">
-                    <TextBlock Text="Logs" FontSize="16" FontWeight="Bold"/>
-                    <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
-                        <TextBlock Text="Filter:" VerticalAlignment="Center" FontWeight="Bold"/>
-                        <RadioButton Content="ALL" IsChecked="{Binding IsFilterAll}" GroupName="Filter" Margin="10,0,0,0"/>
+                    <TextBlock Text="Логи запросов" FontSize="16" FontWeight="Bold"/>
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Фильтр по методу:" VerticalAlignment="Center"/>
+                        <RadioButton Content="Все" IsChecked="{Binding IsFilterAll}" GroupName="Filter" Margin="10,0,0,0"/>
                         <RadioButton Content="GET" IsChecked="{Binding IsFilterGet}" GroupName="Filter"/>
                         <RadioButton Content="POST" IsChecked="{Binding IsFilterPost}" GroupName="Filter"/>
                     </StackPanel>
@@ -71,17 +71,15 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <TextBlock Text="{Binding StatisticsText}" FontWeight="Bold"/>
                 </StackPanel>
             </Border>
             
-            <!-- Right: Statistics -->
+            <!-- Правая панель: статистика -->
             <Border Grid.Column="2" Background="#2D2D2D" Margin="5">
                 <StackPanel Margin="10" Spacing="10">
-                    <TextBlock Text="Statistics" FontSize="16" FontWeight="Bold"/>
+                    <TextBlock Text="Статистика" FontSize="16" FontWeight="Bold"/>
                     
-                    <!-- ===== ГРАФИК ПИКОВОЙ НАГРУЗКИ ===== -->
-                    <TextBlock Text="Peak Load (Top 10 minutes)" FontWeight="Bold" Margin="0,5,0,0"/>
+                    <TextBlock Text="Пиковая нагрузка (топ-10 минут)" FontWeight="Bold" Margin="0,5,0,0"/>
                     <ListBox ItemsSource="{Binding PeakLoadData}" Height="200" Background="#1E1E1E">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
@@ -89,9 +87,8 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <!-- ================================= -->
                     
-                    <TextBlock Text="Summary" FontWeight="Bold" Margin="0,10,0,0"/>
+                    <TextBlock Text="Сводка" FontWeight="Bold" Margin="0,10,0,0"/>
                     <TextBlock Text="{Binding StatisticsText}" TextWrapping="Wrap" Foreground="#FFD700"/>
                 </StackPanel>
             </Border>
