@@ -65,3 +65,4 @@
 /home/daniil/Документы/Pks/kr3/HttpMonitorApp/obj/Debug/net10.0/HttpMoni.7457148D.Up2Date
 /home/daniil/Документы/Pks/kr3/HttpMonitorApp/obj/Debug/net10.0/HttpMonitorApp.genruntimeconfig.cache
 /home/daniil/Документы/Pks/kr3/HttpMonitorApp/obj/Debug/net10.0/ref/HttpMonitorApp.dll
+/home/daniil/Документы/Pks/kr3/HttpMonitorApp/obj/Debug/net10.0/HttpMonitorApp.sourcelink.json

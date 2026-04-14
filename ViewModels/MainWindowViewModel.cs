@@ -43,10 +43,15 @@ public class MainWindowViewModel : ViewModelBase
         FilterLogsCommand = new RelayCommand(() => UpdateLogs());
         
         UpdateStatistics();
-        
+        UpdatePeakLoad();
+
         var timer = new DispatcherTimer();
         timer.Interval = TimeSpan.FromSeconds(1);
-        timer.Tick += (s, e) => UpdateStatistics();
+        timer.Tick += (s, e) => 
+        {
+            UpdateStatistics();
+            UpdatePeakLoad();  // ===== ДОБАВЬТЕ ЭТУ СТРОКУ =====
+        };
         timer.Start();
     }
     
@@ -131,6 +136,13 @@ public class MainWindowViewModel : ViewModelBase
         set => SetProperty(ref _logs, value);
     }
     
+    private ObservableCollection<string> _peakLoadData = new();
+    public ObservableCollection<string> PeakLoadData
+    {
+        get => _peakLoadData;
+        set => SetProperty(ref _peakLoadData, value);
+    }
+
     // Свойства для фильтрации
     private bool _isFilterAll = true;
     public bool IsFilterAll
@@ -292,6 +304,12 @@ public class MainWindowViewModel : ViewModelBase
         
         _logger.AddLog(entry);
         Dispatcher.UIThread.Post(() => UpdateLogs());
+        _logger.AddLog(entry);
+        Dispatcher.UIThread.Post(() => 
+        {
+            UpdateLogs();
+            UpdatePeakLoad();
+        }); 
     }
     
     private async Task SendRequestAsync()
@@ -462,4 +480,22 @@ public class MainWindowViewModel : ViewModelBase
             $"POST: {stats.PostRequests} | " +
             $"Avg Time: {stats.AverageProcessingTimeMs:F1}ms";
     }
+
+    private void UpdatePeakLoad()
+    {
+        var stats = _logger.GetStatistics();
+        
+        PeakLoadData.Clear();
+        
+        if (stats.RequestsPerMinute.Count == 0)
+        {
+            PeakLoadData.Add("No data yet");
+            return;
+        }
+        
+        foreach (var minute in stats.RequestsPerMinute.OrderByDescending(x => x.Value).Take(10))
+        {
+            PeakLoadData.Add($"{minute.Key:HH:mm:ss} - {minute.Value} req/min");
+        }
+    }    
 }
