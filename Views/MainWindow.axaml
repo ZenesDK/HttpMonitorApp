@@ -19,7 +19,7 @@
         <Border DockPanel.Dock="Top" Background="#2D2D2D" Padding="10" Margin="0,0,0,5">
             <StackPanel Orientation="Horizontal" Spacing="10">
                 <TextBlock Text="Server Port:" VerticalAlignment="Center" Foreground="White"/>
-                <NumericUpDown Value="{Binding ServerPort}" Width="100" Minimum="1" Maximum="65535"/>
+                <NumericUpDown Value="{Binding ServerPort}" Width="130" Minimum="1" Maximum="65535"/>
                 <Button Command="{Binding StartServerCommand}" Content="Start Server" Background="Green"/>
                 <Button Command="{Binding StopServerCommand}" Content="Stop Server" Background="Red"/>
                 <TextBlock Text="{Binding ServerStatus}" VerticalAlignment="Center" Foreground="Yellow"/>

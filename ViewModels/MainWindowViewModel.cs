@@ -131,15 +131,62 @@ public class MainWindowViewModel : ViewModelBase
         set => SetProperty(ref _logs, value);
     }
     
+    // Свойства для фильтрации
+    private bool _isFilterAll = true;
+    public bool IsFilterAll
+    {
+        get => _isFilterAll;
+        set
+        {
+            Console.WriteLine($"[DEBUG] IsFilterAll SET to: {value}");
+            if (SetProperty(ref _isFilterAll, value) && value)
+            {
+                Console.WriteLine($"[DEBUG] IsFilterAll = true, setting FilterType to ALL");
+                FilterType = "ALL";
+            }
+        }
+    }
+
+    private bool _isFilterGet;
+    public bool IsFilterGet
+    {
+        get => _isFilterGet;
+        set
+        {
+            Console.WriteLine($"[DEBUG] IsFilterGet SET to: {value}");
+            if (SetProperty(ref _isFilterGet, value) && value)
+            {
+                Console.WriteLine($"[DEBUG] IsFilterGet = true, setting FilterType to GET");
+                FilterType = "GET";
+            }
+        }
+    }
+
+    private bool _isFilterPost;
+    public bool IsFilterPost
+    {
+        get => _isFilterPost;
+        set
+        {
+            Console.WriteLine($"[DEBUG] IsFilterPost SET to: {value}");
+            if (SetProperty(ref _isFilterPost, value) && value)
+            {
+                Console.WriteLine($"[DEBUG] IsFilterPost = true, setting FilterType to POST");
+                FilterType = "POST";
+            }
+        }
+    }
+
     private string _filterType = "ALL";
     public string FilterType
     {
         get => _filterType;
         set
         {
+            Console.WriteLine($"[DEBUG] FilterType SET called with value: {value}");
             if (SetProperty(ref _filterType, value))
             {
-                Console.WriteLine($"[DEBUG] FilterType changed to: {value}");
+                Console.WriteLine($"[DEBUG] FilterType changed to: {_filterType}");
                 UpdateLogs();
             }
         }
@@ -364,41 +411,45 @@ public class MainWindowViewModel : ViewModelBase
     {
         var allLogs = _logger.GetLogs();
         
-        Console.WriteLine($"[DEBUG] UpdateLogs called. FilterType = {FilterType}");
-        Console.WriteLine($"[DEBUG] Total logs in logger: {allLogs.Count}");
+        Console.WriteLine($"[DEBUG] ===== UpdateLogs START =====");
+        Console.WriteLine($"[DEBUG] Current FilterType = '{FilterType}'");
+        Console.WriteLine($"[DEBUG] Total logs count = {allLogs.Count}");
         
+        // Выводим все логи
         foreach (var log in allLogs)
         {
-            Console.WriteLine($"[DEBUG] Log: Type={log.Type}, Method={log.Method}, Url={log.Url}");
+            Console.WriteLine($"[DEBUG] Log: Method='{log.Method}', Type='{log.Type}', Url='{log.Url}'");
         }
         
-        IEnumerable<LogEntry> filtered;
+        // Фильтрация
+        List<LogEntry> filtered;
         
-        switch (FilterType)
+        if (FilterType == "GET")
         {
-            case "GET":
-                filtered = allLogs.Where(l => l.Method == "GET");
-                Console.WriteLine($"[DEBUG] Filtering by GET");
-                break;
-            case "POST":
-                filtered = allLogs.Where(l => l.Method == "POST");
-                Console.WriteLine($"[DEBUG] Filtering by POST");
-                break;
-            default:
-                filtered = allLogs;
-                Console.WriteLine($"[DEBUG] No filter (ALL)");
-                break;
+            filtered = allLogs.Where(l => l.Method == "GET").ToList();
+            Console.WriteLine($"[DEBUG] Filtering by GET, found {filtered.Count} logs");
+        }
+        else if (FilterType == "POST")
+        {
+            filtered = allLogs.Where(l => l.Method == "POST").ToList();
+            Console.WriteLine($"[DEBUG] Filtering by POST, found {filtered.Count} logs");
+        }
+        else
+        {
+            filtered = allLogs.ToList();
+            Console.WriteLine($"[DEBUG] No filter (ALL), showing {filtered.Count} logs");
         }
         
-        var filteredList = filtered.ToList();
-        Console.WriteLine($"[DEBUG] Filtered count: {filteredList.Count}");
-        
+        // Очищаем и добавляем
         Logs.Clear();
-        foreach (var log in filteredList)
+        foreach (var log in filtered)
         {
             Logs.Add(log);
-            Console.WriteLine($"[DEBUG] Added log to UI: {log.Method} - {log.Url}");
+            Console.WriteLine($"[DEBUG] Added to UI: Method='{log.Method}', Url='{log.Url}'");
         }
+        
+        Console.WriteLine($"[DEBUG] UI Logs count after update: {Logs.Count}");
+        Console.WriteLine($"[DEBUG] ===== UpdateLogs END =====");
     }
     
     private void UpdateStatistics()

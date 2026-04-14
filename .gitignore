@@ -1,0 +1,96 @@
+# .NET build artifacts
+bin/
+obj/
+*.user
+*.userprefs
+*.lock.json
+*.deps.json
+*.runtimeconfig.json
+
+# Rider / Visual Studio / VS Code
+.idea/
+.vs/
+.vscode/
+*.suo
+*.sln.docstates
+*.csproj.user
+
+# Avalonia specific
+**/obj/
+**/bin/
+
+# NuGet packages
+packages/
+*.nupkg
+*.snupkg
+
+# Logs
+*.log
+logs_*.json
+*.txt
+
+# User-specific files
+*.rsuser
+*.suo
+*.userosscache
+*.sln.ide
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Bb]uild/
+
+# Visual Studio cache files
+.vs/
+*.cache
+*.tmp
+*.temp
+*.tmp_proj
+
+# .NET Core / .NET 5+ specific
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Linux specific
+*~
+.directory
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage reports
+*.coverage
+*.coverage.xml
+*.coverlet
+*.trx
+TestResults/
+
+# Publish profiles
+*.pubxml.user
+
+# Backup files
+*.bak
+*.backup
