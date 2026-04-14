@@ -94,3 +94,5 @@ TestResults/
 # Backup files
 *.bak
 *.backup
+
+logs*
