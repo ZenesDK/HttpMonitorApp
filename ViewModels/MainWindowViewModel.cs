@@ -28,13 +28,21 @@ public class MainWindowViewModel : ViewModelBase
         
         _server.OnGetRequest += HandleGetRequest;
         _server.OnPostRequest += HandlePostRequest;
-        ((HttpServerService)_server).OnRequestProcessed += LogIncomingRequest;
+        
+        // ===== ТОЛЬКО ОДНА ПОДПИСКА =====
+        if (_server is HttpServerService httpServer)
+        {
+            httpServer.OnRequestProcessed += LogIncomingRequest;
+        }
+        // ================================
         
         ServerPort = 8080;
         ClientUrl = "http://127.0.0.1:8080";
         ClientRequestBody = "{\"message\": \"test\"}";
         ClientMethod = "GET";
         IsGetSelected = true;
+        IsFilterAll = true;
+        _filterType = "ALL";
         
         StartServerCommand = new AsyncRelayCommand(StartServerAsync);
         StopServerCommand = new AsyncRelayCommand(StopServerAsync);
@@ -44,13 +52,13 @@ public class MainWindowViewModel : ViewModelBase
         
         UpdateStatistics();
         UpdatePeakLoad();
-
+        
         var timer = new DispatcherTimer();
         timer.Interval = TimeSpan.FromSeconds(1);
         timer.Tick += (s, e) => 
         {
             UpdateStatistics();
-            UpdatePeakLoad();  // ===== ДОБАВЬТЕ ЭТУ СТРОКУ =====
+            UpdatePeakLoad();
         };
         timer.Start();
     }
@@ -302,8 +310,6 @@ public class MainWindowViewModel : ViewModelBase
             DateTime.Now
         );
         
-        _logger.AddLog(entry);
-        Dispatcher.UIThread.Post(() => UpdateLogs());
         _logger.AddLog(entry);
         Dispatcher.UIThread.Post(() => 
         {
