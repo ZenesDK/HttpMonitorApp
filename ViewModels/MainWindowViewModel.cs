@@ -47,12 +47,18 @@ public class MainWindowViewModel : ViewModelBase
         IsGetSelected = true;
         IsFilterAll = true;
         _filterType = "ALL";
+        // --- ИЗМЕНЕНО: Установка по умолчанию для пиковой нагрузки ---
+        ShowPeakPerMinute = true; // По умолчанию показываем минуты
+        // --- КОНЕЦ ИЗМЕНЕНИЯ ---
 
         StartServerCommand = new AsyncRelayCommand(StartServerAsync);
         StopServerCommand = new AsyncRelayCommand(StopServerAsync);
         SendRequestCommand = new AsyncRelayCommand(SendRequestAsync);
         SaveLogsCommand = new AsyncRelayCommand(SaveLogsAsync);
         FilterLogsCommand = new RelayCommand(() => UpdateLogs());
+        // --- НОВОЕ: Команда для переключения фильтра по статусу ---
+        ToggleStatusFilterCommand = new RelayCommand(() => IsFilterByStatus = !IsFilterByStatus);
+        // --- КОНЕЦ НОВОГО ---
 
         UpdateStatistics();
         UpdatePeakLoad();
@@ -155,7 +161,7 @@ public class MainWindowViewModel : ViewModelBase
         set => SetProperty(ref _peakLoadData, value);
     }
 
-    // Свойства для фильтрации
+    // Свойства для фильтрации по методу
     private bool _isFilterAll = true;
     public bool IsFilterAll
     {
@@ -216,6 +222,62 @@ public class MainWindowViewModel : ViewModelBase
         }
     }
 
+    // --- НОВОЕ: Свойства для фильтрации по статусу ---
+    private bool _isFilterByStatus = false;
+    public bool IsFilterByStatus
+    {
+        get => _isFilterByStatus;
+        set => SetProperty(ref _isFilterByStatus, value);
+    }
+
+    private string _selectedStatusCodeFilter = "ALL"; // "ALL", "200", "400", "500", etc.
+    public string SelectedStatusCodeFilter
+    {
+        get => _selectedStatusCodeFilter;
+        set
+        {
+            if (SetProperty(ref _selectedStatusCodeFilter, value))
+            {
+                UpdateLogs(); // Обновляем логи при изменении фильтра
+            }
+        }
+    }
+
+    private ObservableCollection<string> _availableStatusCodes = new()
+    {
+        "ALL", "200", "201", "400", "404", "405", "429", "500", "502", "503"
+    };
+    public ObservableCollection<string> AvailableStatusCodes => _availableStatusCodes;
+    // --- КОНЕЦ НОВОГО ---
+
+    // --- НОВОЕ: Свойства для выбора типа нагрузки ---
+    private bool _showPeakPerMinute = true; // По умолчанию показываем минуты
+    public bool ShowPeakPerMinute
+    {
+        get => _showPeakPerMinute;
+        set
+        {
+            if (SetProperty(ref _showPeakPerMinute, value))
+            {
+                UpdatePeakLoad(); // Обновляем график при смене типа
+            }
+        }
+    }
+
+    private bool _showPeakPerHour;
+    public bool ShowPeakPerHour
+    {
+        get => _showPeakPerHour;
+        set
+        {
+            if (SetProperty(ref _showPeakPerHour, value))
+            {
+                UpdatePeakLoad(); // Обновляем график при смене типа
+            }
+        }
+    }
+    // --- КОНЕЦ НОВОГО ---
+
     private string _statisticsText = string.Empty;
     public string StatisticsText
     {
@@ -229,6 +291,9 @@ public class MainWindowViewModel : ViewModelBase
     public AsyncRelayCommand SendRequestCommand { get; }
     public AsyncRelayCommand SaveLogsCommand { get; }
     public RelayCommand FilterLogsCommand { get; }
+    // --- НОВОЕ: Команда для переключения фильтра по статусу ---
+    public RelayCommand ToggleStatusFilterCommand { get; }
+    // --- КОНЕЦ НОВОГО ---
 
     // --- ИЗМЕНЁННЫЙ HandleGetRequest ---
     private Task<HttpResponse> HandleGetRequest(RequestInfo request)
@@ -488,21 +553,20 @@ public class MainWindowViewModel : ViewModelBase
         });
     }
 
+    // --- ИЗМЕНЁННЫЙ UpdateLogs ---
     private void UpdateLogs()
     {
         var allLogs = _logger.GetLogs();
 
         Console.WriteLine($"[DEBUG] ===== UpdateLogs START =====");
         Console.WriteLine($"[DEBUG] Current FilterType = '{FilterType}'");
+        Console.WriteLine($"[DEBUG] Current SelectedStatusCodeFilter = '{SelectedStatusCodeFilter}'");
+        Console.WriteLine($"[DEBUG] IsFilterByStatus = '{IsFilterByStatus}'");
         Console.WriteLine($"[DEBUG] Total logs count = {allLogs.Count}");
-
-        foreach (var log in allLogs)
-        {
-            Console.WriteLine($"[DEBUG] Log: Method='{log.Method}', Type='{log.Type}', StatusCode='{log.StatusCode}', Url='{log.Url}'");
-        }
 
         List<LogEntry> filtered;
 
+        // Сначала фильтруем по методу (как раньше)
         if (FilterType == "GET")
         {
             filtered = allLogs.Where(l => l.Method == "GET").ToList();
@@ -516,8 +580,32 @@ public class MainWindowViewModel : ViewModelBase
         else
         {
             filtered = allLogs.ToList();
-            Console.WriteLine($"[DEBUG] No filter (ALL), showing {filtered.Count} logs");
+            Console.WriteLine($"[DEBUG] No filter (ALL) by Method, showing {filtered.Count} logs");
         }
+
+        // --- НОВОЕ: Затем фильтруем по статус-коду ---
+        if (IsFilterByStatus && SelectedStatusCodeFilter != "ALL")
+        {
+            if (int.TryParse(SelectedStatusCodeFilter, out int targetStatusCode))
+            {
+                filtered = filtered.Where(l => l.StatusCode == targetStatusCode).ToList();
+                Console.WriteLine($"[DEBUG] Filtering by StatusCode {targetStatusCode}, found {filtered.Count} logs");
+            }
+            else
+            {
+                 // Если SelectedStatusCodeFilter не "ALL" и не число, фильтруем по "ALL" (или можно просто вывести лог)
+                 Console.WriteLine($"[DEBUG] SelectedStatusCodeFilter '{SelectedStatusCodeFilter}' is not numeric, showing ALL filtered by method.");
+            }
+        }
+        else if (IsFilterByStatus) // SelectedStatusCodeFilter == "ALL"
+        {
+             Console.WriteLine($"[DEBUG] SelectedStatusCodeFilter is ALL, showing all filtered by method.");
+        }
+        else // !IsFilterByStatus
+        {
+             Console.WriteLine($"[DEBUG] IsFilterByStatus is false, skipping StatusCode filter.");
+        }
+        // --- КОНЕЦ НОВОГО ---
 
         Logs.Clear();
         foreach (var log in filtered)
@@ -529,7 +617,9 @@ public class MainWindowViewModel : ViewModelBase
         Console.WriteLine($"[DEBUG] UI Logs count after update: {Logs.Count}");
         Console.WriteLine($"[DEBUG] ===== UpdateLogs END =====");
     }
+    // --- КОНЕЦ UpdateLogs ---
 
+    // --- ИЗМЕНЁННЫЙ UpdateStatistics ---
     private void UpdateStatistics()
     {
         var stats = _logger.GetStatistics();
@@ -540,22 +630,29 @@ public class MainWindowViewModel : ViewModelBase
             $"POST: {stats.PostRequests} |  " +
             $"Среднее время: {stats.AverageProcessingTimeMs:F1}ms ";
     }
+    // --- КОНЕЦ UpdateStatistics ---
 
+    // --- ИЗМЕНЁННЫЙ UpdatePeakLoad ---
     private void UpdatePeakLoad()
     {
         var stats = _logger.GetStatistics();
 
         PeakLoadData.Clear();
 
-        if (stats.RequestsPerMinute.Count == 0)
+        // Выбираем, какие данные использовать
+        var dataToUse = ShowPeakPerMinute ? stats.RequestsPerMinute : stats.RequestsPerHour;
+        var timeFormat = ShowPeakPerMinute ? "HH:mm:ss" : "dd.MM.yyyy HH:00"; // Формат времени
+
+        if (dataToUse.Count == 0)
         {
             PeakLoadData.Add("Данных пока нет");
             return;
         }
 
-        foreach (var minute in stats.RequestsPerMinute.OrderByDescending(x => x.Value).Take(10))
+        foreach (var period in dataToUse.OrderByDescending(x => x.Value).Take(10))
         {
-            PeakLoadData.Add($"{minute.Key:HH:mm:ss} - {minute.Value} запросов/мин");
+            PeakLoadData.Add($"{period.Key.ToString(timeFormat)} - {period.Value} запросов/{(ShowPeakPerMinute ? "мин" : "час")}");
         }
     }
+    // --- КОНЕЦ UpdatePeakLoad ---
 }

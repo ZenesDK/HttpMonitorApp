@@ -11,4 +11,5 @@ public class Statistics
     public int PostRequests { get; set; }
     public double AverageProcessingTimeMs { get; set; }
     public Dictionary<DateTime, int> RequestsPerMinute { get; set; } = new();
+    public Dictionary<DateTime, int> RequestsPerHour { get; set; } = new();
 }

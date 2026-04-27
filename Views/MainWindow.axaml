@@ -25,6 +25,24 @@
                 <TextBlock Text="{Binding ServerStatus}" VerticalAlignment="Center" Foreground="Yellow"/>
             </StackPanel>
         </Border>
+
+        <!-- ПАНЕЛЬ ДЛЯ ФИЛЬТРОВ -->
+        <Border DockPanel.Dock="Top" Background="#1E1E1E" Padding="10" Margin="0,0,0,5"> <!-- Цвет фона чуть светлее -->
+            <StackPanel Orientation="Horizontal" Spacing="10">
+                <TextBlock Text="Фильтр по методу:" VerticalAlignment="Center" Foreground="White"/>
+                <RadioButton Content="Все" IsChecked="{Binding IsFilterAll}" GroupName="FilterMethod" Margin="10,0,0,0"/>
+                <RadioButton Content="GET" IsChecked="{Binding IsFilterGet}" GroupName="FilterMethod"/>
+                <RadioButton Content="POST" IsChecked="{Binding IsFilterPost}" GroupName="FilterMethod"/>
+
+                <!-- Разделитель -->
+                <Rectangle Fill="Gray" Width="1" Height="20" Margin="10,0"/>
+
+                <CheckBox IsChecked="{Binding IsFilterByStatus}" Content="Фильтр по статусу:" VerticalAlignment="Center" Foreground="White"/>
+                <ComboBox ItemsSource="{Binding AvailableStatusCodes}" SelectedItem="{Binding SelectedStatusCodeFilter}" Width="100" IsEnabled="{Binding IsFilterByStatus}">
+                    <!-- ItemsSource можно заполнить в ViewModel -->
+                </ComboBox>
+            </StackPanel>
+        </Border>
         
         <Grid ColumnDefinitions="*, 2*, *">
             <!-- Левая панель: HTTP-клиент -->
